@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Прохождение опроса или анкеты</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #fae8ff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            color: #333;
+        }
+        .quiz-container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2);
+            border: 2px solid #f472b6;
+        }
+        h2 {
+            color: #db2777;
+            text-align: center;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #fdf2f8;
+            border-radius: 14px;
+            border-left: 4px solid #ec4899;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #fbcfe8;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        input[type="text"]:focus {
+            border-color: #ec4899;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #ec4899, #0284c7);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+        .result-box {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #0284c7;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div id="survey-content">
+            <h2>Загрузка...</h2>
+        </div>
+        <p style="text-align: center; margin-top: 20px;"><a href="index.html" style="color: #0284c7; text-decoration: none; font-weight: bold;">← На главную</a></p>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const surveyId = urlParams.get('id');
+
+        async function loadSurvey() {
+            try {
+                const response = await fetch('/api/surveys');
+                const surveys = await response.json();
+                const survey = surveys.find(s => String(s.id) === String(surveyId));
+
+                const container = document.getElementById('survey-content');
+
+                if (!survey) {
+                    container.innerHTML = '<h2>Опрос не найден!</h2>';
+                    return;
+                }
+
+                let html = `<h2>${survey.title}</h2><p style="text-align: center; color: #666; margin-bottom: 25px;">${survey.description || ''}</p><form id="quiz-form">`;
+
+                survey.questions.forEach((q, qIndex) => {
+                    html += `
+                        <div class="question-block">
+                            <p><b>Вопрос ${qIndex + 1}: ${q.title}</b></p>
+                    `;
+
+                    // Проверяем тип вопроса: текстовый или с выбором
+                    if (q.type === 'text') {
+                        html += `
+                            <input type="text" name="question_${qIndex}" placeholder="Ваш ответ..." required>
+                        `;
+                    } else {
+                        // Обычные варианты ответа (радиокнопки)
+                        if (q.options && q.options.length > 0) {
+                            q.options.forEach((opt, optIndex) => {
+                                html += `
+                                    <label style="display: block; margin: 10px 0; cursor: pointer;">
+                                        <input type="radio" name="question_${qIndex}" value="${optIndex}" required>
+                                        ${opt}
+                                    </label>
+                                `;
+                            });
+                        }
+                    }
+
+                    html += `</div>`;
+                });
+
+                html += `<button type="submit" class="btn-submit">Отправить ответы</button></form><div id="result" class="result-box"></div>`;
+                container.innerHTML = html;
+
+                // Обработка отправки формы
+document.getElementById('quiz-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    let score = 0;
+    let choiceQuestionsCount = 0;
+    let hasCorrectAnswersDefined = false;
+
+    survey.questions.forEach((q, qIndex) => {
+        if (q.type !== 'text') {
+            choiceQuestionsCount++;
+            
+            // Проверяем, что правильный ответ реально задан и это число (не null, не undefined и не пустая строка)
+            if (q.correct !== undefined && q.correct !== null && q.correct !== '' && !isNaN(q.correct)) {
+                hasCorrectAnswersDefined = true;
+                const selected = document.querySelector(`input[name="question_${qIndex}"]:checked`);
+                const correctIndex = parseInt(q.correct);
+
+                if (selected && parseInt(selected.value) === correctIndex) {
+                    score++;
+                }
+            }
+        }
+    });
+
+    const resultDiv = document.getElementById('result');
+
+    // Выводим результат теста ТОЛЬКО если создатель реально указал правильные ответы в конструкторе
+    if (hasCorrectAnswersDefined) {
+        resultDiv.innerHTML = `✨ Спасибо за ответы! Результат теста: ${score} из ${choiceQuestionsCount} правильных. ✨`;
+    } else {
+        // Если это обычная анкета
+        resultDiv.innerHTML = `✨ Спасибо за ответы! Ваши ответы успешно отправлены! ✨`;
+    }
+});
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('survey-content').innerHTML = '<h2>Ошибка загрузки опроса</h2>';
+            }
+        }
+
+        loadSurvey();
+    </script>
+</body>
+</html>

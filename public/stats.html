@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты опроса</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div class="nav">
+        <h1 id="survey-title">Результаты</h1>
+        <a href="index.html" class="btn btn-secondary">← На главную</a>
+    </div>
+    <p><strong>Всего прохождений:</strong> <span id="total-count">0</span></p>
+    <div id="stats-container">Загрузка статистики...</div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const surveyId = params.get('id');
+
+    async function loadStats() {
+        const res = await fetch(`/api/stats/${surveyId}`);
+        const data = await res.json();
+
+        document.getElementById('survey-title').innerText = 'Статистика: ' + data.surveyTitle;
+        document.getElementById('total-count').innerText = data.totalResponses;
+
+        const container = document.getElementById('stats-container');
+        if (data.totalResponses === 0) {
+            container.innerHTML = '<p>Пока никто не прошел этот опрос.</p>';
+            return;
+        }
+
+        container.innerHTML = data.stats.map((item, idx) => {
+            if (item.type === 'text') {
+                const list = item.answers.length
+                    ? <ul>${item.answers.map(a => <li>${a}</li>).join('')}</ul>
+                    : '<p style="color:#777">Нет текстовых ответов</p>';
+                return <div class="card"><h3>${idx + 1}. ${item.title}</h3>${list}</div>;
+            } else {
+                const bars = Object.entries(item.counts).map(([option, count]) => {
+                    const percent = Math.round((count / data.totalResponses) * 100);
+                    return 
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:14px;">
+                                <span>${option}</span>
+                                <span><strong>${count}</strong> чел. (${percent}%)</span>
+                            </div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="width: ${percent}%">${percent > 8 ? percent + '%' : ''}</div>
+                            </div>
+                        </div>
+                    ;
+                }).join('');
+                return <div class="card"><h3>${idx + 1}. ${item.title}</h3>${bars}</div>;
+            }
+        }).join('');
+    }
+    loadStats();
+</script>
+</body>
+</html>
+

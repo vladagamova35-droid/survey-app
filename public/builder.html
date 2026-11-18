@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание опроса или теста</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #fae8ff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            color: #333;
+        }
+        .builder-container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2);
+            border: 2px solid #f472b6;
+        }
+        h2 {
+            color: #db2777;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #db2777;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #fbcfe8;
+            border-radius: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #ec4899;
+        }
+        .question-block {
+            background: #fdf2f8;
+            padding: 20px;
+            border-radius: 14px;
+            border-left: 5px solid #ec4899;
+            margin-bottom: 20px;
+        }
+        .option-row {
+            margin-bottom: 10px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #ec4899, #0284c7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-secondary {
+            background: #0284c7;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="builder-container">
+        <h2>✨ Создание нового опроса или теста ✨</h2>
+        
+        <form id="builder-form">
+            <div class="form-group">
+                <label>Название опроса / теста:</label>
+                <input type="text" id="survey-title" placeholder="Например: Уютный квиз по интересам" required>
+            </div>
+
+            <div class="form-group">
+                <label>Описание:</label>
+                <textarea id="survey-desc" placeholder="Краткое описание о чем этот опрос..."></textarea>
+            </div>
+
+            <div id="questions-container">
+                <!-- Сюда динамически добавляются вопросы -->
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="add-question-btn">+ Добавить вопрос</button>
+            <br><br>
+            <button type="submit" class="btn" style="width: 100%; padding: 14px; font-size: 16px;">💾 Сохранить опрос</button>
+        </form>
+        <p style="text-align: center; margin-top: 15px;"><a href="index.html" style="color: #0284c7; text-decoration: none; font-weight: bold;">← На главную</a></p>
+    </div>
+
+    <script>
+        const questionsContainer = document.getElementById('questions-container');
+        const addQuestionBtn = document.getElementById('add-question-btn');
+
+        function addQuestion() {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'question-block';
+            
+            qDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Текст вопроса:</label>
+                    <input type="text" class="q-title" placeholder="Введите вопрос" required>
+                    </div>
+                <div class="form-group">
+                    <label>Варианты ответов:</label>
+                    <div class="option-row"><input type="text" class="q-option" placeholder="Вариант 1" required></div>
+                    <div class="option-row"><input type="text" class="q-option" placeholder="Вариант 2" required></div>
+                    <div class="option-row"><input type="text" class="q-option" placeholder="Вариант 3"></div>
+                    <div class="option-row"><input type="text" class="q-option" placeholder="Вариант 4"></div>
+                </div>
+                <div class="form-group">
+                    <label>Номер правильного ответа (1, 2, 3 или 4):</label>
+                    <input type="number" class="q-correct" min="1" max="4" placeholder="не обязательно" style="width: 120px; padding: 6px; border: 2px solid #fbcfe8; border-radius: 8px;">
+                </div>
+                <button type="button" class="btn" style="background: #f43f5e; padding: 6px 12px; font-size: 12px;" onclick="this.parentElement.remove()">Удалить вопрос</button>
+            `;
+            questionsContainer.appendChild(qDiv);
+        }
+
+        // Добавляем один вопрос при загрузке страницы
+        addQuestion();
+
+        addQuestionBtn.addEventListener('click', addQuestion);
+
+        document.getElementById('builder-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('survey-title').value;
+            const description = document.getElementById('survey-desc').value;
+            
+            const questionBlocks = document.querySelectorAll('.question-block');
+            const questions = [];
+
+            questionBlocks.forEach(block => {
+                const qTitle = block.querySelector('.q-title').value;
+                const optionInputs = block.querySelectorAll('.q-option');
+                const options = [];
+                
+                optionInputs.forEach(input => {
+                    if (input.value.trim() !== '') {
+                        options.push(input.value.trim());
+                    }
+                });
+
+                // Вычитаем 1, чтобы индекс правильного ответа начинался с 0 (первый вариант = 0)
+                const correctInput = block.querySelector('.q-correct').value.trim();
+                let correctVal = null;
+                if (correctInput !== '') {
+                    correctVal = parseInt(correctInput) - 1
+                }
+
+                questions.push({
+                    title: qTitle,
+                    type: 'choice',
+                    options: options,
+                    correct: correctVal
+                });
+            });
+
+            const newSurvey = {
+                id: 'survey_' + Date.now(),
+                title: title,
+                description: description,
+                questions: questions
+            };
+
+            try {
+                const response = await fetch('/api/surveys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newSurvey)
+                });
+
+                if (response.ok) {
+                    alert('Опрос успешно создан!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Ошибка при сохранении опроса');
+                }
+            } catch (err) {
+                console.error('Ошибка:', err);
+                alert('Не удалось отправить данные на сервер');
+            }
+        });
+    </script>
+</body>
+</html>
