@@ -175,30 +175,24 @@ label {
     padding-left: 10px;
     transition: width 0.5s ease;
 }
-
-/* Общий фон страницы (нежно-голубой или пастельно-розовый) */
 body {
-    background-color: #7cbced; /* мягкий голубоватый оттенок */
+    background-color: #7cbced;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
     margin: 0;
     padding: 20px;
 }
-
-/* Карточки опросов (белые с голубой или розовой тенью/акцентом) */
 .survey-card, div[style*="background"] {
     background: #ffffff !important;
-    border-left: 5px solid #ff69b4 !important; /* розовая полоска слева */
+    border-left: 5px solid #ff69b4 !important; 
     border-radius: 12px;
     padding: 20px;
     margin: 15px auto;
     max-width: 600px;
-    box-shadow: 0 4px 15px rgba(135, 206, 250, 0.3); /* голубоватая тень */
+    box-shadow: 0 4px 15px rgba(135, 206, 250, 0.3); 
 }
-
-/* Кнопка «Создать опрос» (розовая или голубая с градиентом) */
 .btn-create, a[href="builder.html"], button {
-    background: linear-gradient(135deg, #ff69b4, #00bfff) !important; /* переход от розового к голубому */
+    background: linear-gradient(135deg, #ff69b4, #00bfff) !important;
     color: white !important;
     padding: 12px 24px;
     text-decoration: none;
@@ -213,8 +207,6 @@ body {
 .btn-create:hover, a[href="builder.html"]:hover, button:hover {
     transform: scale(1.05);
 }
-
-/* Заголовки */
 h1, h3 {
     color: #4a0e4e;
     text-align: center;

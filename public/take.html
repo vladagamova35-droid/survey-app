@@ -127,8 +127,6 @@
 
                 html += `<button type="submit" class="btn-submit">Отправить ответы</button></form><div id="result" class="result-box"></div>`;
                 container.innerHTML = html;
-
-                // Обработка отправки формы
 document.getElementById('quiz-form').addEventListener('submit', (e) => {
     e.preventDefault();
     let score = 0;
@@ -138,8 +136,6 @@ document.getElementById('quiz-form').addEventListener('submit', (e) => {
     survey.questions.forEach((q, qIndex) => {
         if (q.type !== 'text') {
             choiceQuestionsCount++;
-            
-            // Проверяем, что правильный ответ реально задан и это число (не null, не undefined и не пустая строка)
             if (q.correct !== undefined && q.correct !== null && q.correct !== '' && !isNaN(q.correct)) {
                 hasCorrectAnswersDefined = true;
                 const selected = document.querySelector(`input[name="question_${qIndex}"]:checked`);
@@ -153,12 +149,9 @@ document.getElementById('quiz-form').addEventListener('submit', (e) => {
     });
 
     const resultDiv = document.getElementById('result');
-
-    // Выводим результат теста ТОЛЬКО если создатель реально указал правильные ответы в конструкторе
     if (hasCorrectAnswersDefined) {
         resultDiv.innerHTML = `✨ Спасибо за ответы! Результат теста: ${score} из ${choiceQuestionsCount} правильных. ✨`;
     } else {
-        // Если это обычная анкета
         resultDiv.innerHTML = `✨ Спасибо за ответы! Ваши ответы успешно отправлены! ✨`;
     }
 });

@@ -6,53 +6,47 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Кнопка создания опроса вверху -->
     <div style="text-align: center; margin: 20px 0;">
         <a href="builder.html" style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px;">+ Создать опрос</a>
     </div>
-
-    <!-- Контейнер, куда будут подгружаться опросы -->
     <div class="surveys-list">
         Загрузка...
     </div>
-
-    <!-- В ЭТО МЕСТО ВСТАВЛЯЕТСЯ ВАШ СКРИПТ -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const container = document.querySelector('.surveys-list') || document.body;
+            const container = document.querySelector('.surveys-list') || document.body
             
             try {
-                const response = await fetch('/api/surveys');
-                const surveys = await response.json();
+                const response = await fetch('/api/surveys')
+                const surveys = await response.json()
 
-                if (container) container.innerHTML = '';
+                if (container) container.innerHTML = ''
 
                 if (surveys.length === 0) {
-                    container.innerHTML = '<p>Пока нет созданных опросов. Нажмите «Создать опрос»!</p>';
-                    return;
+                    container.innerHTML = '<p>Пока нет созданных опросов. Нажмите «Создать опрос»!</p>'
+                    return
                 }
 
-                const listTitle = document.createElement('h3');
-                listTitle.textContent = 'Доступные опросы и анкеты:';
-                container.appendChild(listTitle);
+                const listTitle = document.createElement('h3')
+                listTitle.textContent = 'Доступные опросы и анкеты:'
+                container.appendChild(listTitle)
 
                 surveys.forEach(survey => {
-                    const surveyCard = document.createElement('div');
-                    surveyCard.style.cssText = 'background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);';
+                    const surveyCard = document.createElement('div')
+                    surveyCard.style.cssText = 'background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'
                     
                     surveyCard.innerHTML = `
                         <h4>${survey.title || 'Без названия'}</h4>
                         <p>${survey.description || ''}</p>
                         <a href="take.html?id=${survey.id}" style="color: #0066cc; text-decoration: none; font-weight: bold;">Пройти опрос →</a>
-                    `;
-                    container.appendChild(surveyCard);
-                });
+                    `
+                    container.appendChild(surveyCard)
+                })
 
             } catch (error) {
-                console.error('Ошибка загрузки опросов:', error);
+                console.error('Ошибка загрузки опросов:', error)
             }
-        });
+        })
     </script>
 </body>
 </html>
